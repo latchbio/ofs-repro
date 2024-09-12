@@ -1,4 +1,5 @@
 import asyncio
+import random
 import shutil
 from pathlib import Path
 
@@ -20,6 +21,8 @@ pvc_name = "ofs-repro-development-objectivefs-pvc"
 async def create_and_monitor_pod(folder: str, shared_dir: Path) -> None:
     pod_name = f"script-runner-{folder}"
 
+    await asyncio.sleep(random.uniform(1, 5))
+
     pod = V1Pod(
         metadata=V1ObjectMeta(
             name=pod_name,
@@ -30,7 +33,7 @@ async def create_and_monitor_pod(folder: str, shared_dir: Path) -> None:
             containers=[
                 V1Container(
                     name="script-runner",
-                    image="python:3.9-slim",
+                    image="812206152185.dkr.ecr.us-west-2.amazonaws.com/latch-base:fe0b-main",
                     command=["python", f"/nf-workdir/{folder}/script.py"],
                     volume_mounts=[
                         V1VolumeMount(
@@ -74,7 +77,7 @@ async def create_and_monitor_pod(folder: str, shared_dir: Path) -> None:
                 exitstatus = f.read().strip()
             print(f"Pod {pod_name} exitstatus: {exitstatus}")
         else:
-            raise Exception(f"Pod {pod_name} exitstatus file not found")
+            raise Exception(f"Pod {pod_name} exitstatus file not found at {exitstatus_file}")
 
         await kube_client.core_v1_api.delete_namespaced_pod(name=pod_name, namespace="ofs-repro")
 

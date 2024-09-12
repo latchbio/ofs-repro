@@ -10,7 +10,7 @@ spec:
   restartPolicy: Never
   containers:
     - name: nf-dispatcher
-      image: 812206152185.dkr.ecr.us-west-2.amazonaws.com/ofs-repro:ofs-repro-e22b-main
+      image: 812206152185.dkr.ecr.us-west-2.amazonaws.com/ofs-repro:ofs-repro-f35d-main
       command:
         - /bin/sh
         - -c
