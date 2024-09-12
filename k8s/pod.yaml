@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ofs-tester
+  namespace: ofs-repro
+  labels:
+    app: nf-dispatcher
+spec:
+  serviceAccountName: ofs-repro
+  restartPolicy: Never
+  containers:
+    - name: nf-dispatcher
+      image: 812206152185.dkr.ecr.us-west-2.amazonaws.com/ofs-repro:ofs-repro-e22b-main
+      command:
+        - /bin/sh
+        - -c
+        - /root/venv/bin/python -m app.main
+      resources:
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+      ports:
+        - containerPort: 5001
+      volumeMounts:
+        - name: ofs-repro-development-objectivefs-pvc
+          mountPath: /nf-workdir
+      env:
+        # >>> objectivefs
+        - name: OBJECTIVEFS_PASSPHRASE
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.OBJECTIVEFS_PASSPHRASE
+        - name: OBJECTIVEFS_LICENSE
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.OBJECTIVEFS_LICENSE
+        - name: ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.ACCESS_KEY
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.SECRET_KEY
+        - name: OBJECTSTORE
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.OBJECTSTORE
+        - name: DISKCACHE_SIZE
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.DISKCACHE_SIZE
+        - name: CACHESIZE
+          valueFrom:
+            secretKeyRef:
+              name: objectivefs-secret
+              key: env.CACHESIZE
+  volumes:
+    - name: ofs-repro-development-objectivefs-pvc
+      persistentVolumeClaim:
+        claimName: ofs-repro-development-objectivefs-pvc

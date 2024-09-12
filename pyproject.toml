@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "ofs-repro"
+description = ""
+version = "0.1.0"
+
+authors = ["rahuldesai1 <rahul@latch.bio>"]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+latch-asgi = "^1.0.3"
+latch-o11y = "^0.1.4"
+opentelemetry-sdk = "^1.15.0"
+opentelemetry-instrumentation-asgi = "^0.36b0"
+kubernetes = "^29.0.0"
+latch-postgres = "^0.1.18"
+boto3-stubs = "^1.34.101"
+aiobotocore = "^2.12.3"
+types-aiobotocore = { extras = ["cloudwatch", "efs"], version = "^2.13.1" }
+kubernetes-asyncio = "^29.0.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy-boto3-secretsmanager = "<=1.34.101"

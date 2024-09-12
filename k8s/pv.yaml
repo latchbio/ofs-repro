@@ -1,0 +1,95 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ofs-repro-development-objectivefs-pv
+  labels:
+    latch/runtime: nextflow-demo
+spec:
+  capacity:
+    storage: 1Pi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - mt
+    - noatime
+    - nodiratime
+    - nowritedelay
+    - oob
+  csi:
+    driver: org.democratic-csi.node-manual
+    readOnly: false
+    fsType: objectivefs
+    volumeHandle: objectivefs-nextflow/ofs-repro-dev
+    nodeStageSecretRef:
+      name: objectivefs-secret
+      namespace: flyte
+    volumeAttributes:
+      node_attach_driver: objectivefs
+      provisioner_driver: node-manual
+      filesystem: objectivefs-nextflow/ofs-repro-dev
+      env.TLS: "1"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ofs-repro-development-objectivefs-pvc
+  namespace: ofs-repro
+  labels:
+    latch/runtime: nextflow-demo
+spec:
+  volumeName: ofs-repro-development-objectivefs-pv
+  storageClassName: ""
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Pi
+
+# ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ofs-repro
+  namespace: ofs-repro
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ofs-repro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - "pods"
+      - "pods/status"
+      - "persistentvolumeclaims"
+      - "persistentvolumes"
+    verbs:
+      - "create"
+      - "delete"
+      - "get"
+      - "list"
+      - "patch"
+  - apiGroups:
+      - "storage.k8s.io"
+    resources:
+      - "storageclasses"
+    verbs:
+      - "create"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ofs-repro
+subjects:
+  - kind: ServiceAccount
+    name: ofs-repro
+    namespace: ofs-repro
+roleRef:
+  kind: ClusterRole
+  name: ofs-repro
+  apiGroup: rbac.authorization.k8s.io
